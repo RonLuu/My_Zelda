@@ -6,7 +6,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("graphics/test/player.png").convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
         self.direction = pygame.math.Vector2()
-        self.speed = 7
+        self.speed = 10
         self.obstacle_sprites = obstacle_sprites
 
     def input(self):
