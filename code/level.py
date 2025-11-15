@@ -43,10 +43,18 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.half_height = self.display_surface.get_size()[1]//2
         self.offset = pygame.math.Vector2()
 
+        # Creating the floor
+        self.floor_surf = pygame.image.load("graphics/tilemap/ground.png").convert()
+        self.floor_rect = self.floor_surf.get_rect(topleft= (0,0))
+
     def custom_draw(self, player):
         # getting the offset
         self.offset.x = self.half_width - player.rect.centerx
         self.offset.y = self.half_height - player.rect.centery
+
+        floor_offset_pos = self.floor_rect.topleft + self.offset
+        self.display_surface.blit(self.floor_surf, floor_offset_pos)
+
         for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft + self.offset
             self.display_surface.blit(sprite.image, offset_pos)
