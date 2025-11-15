@@ -7,6 +7,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = pos)
         self.direction = pygame.math.Vector2()
         self.speed = 10
+        self.hitbox = self.rect.inflate(0, -26)
         self.obstacle_sprites = obstacle_sprites
 
     def input(self):
@@ -30,27 +31,32 @@ class Player(pygame.sprite.Sprite):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
 
-        self.rect.x += self.direction.x*speed
+        # Move the hitbox accordingly
+        self.hitbox.x += self.direction.x*speed
         self.collide("horizontal")
-        self.rect.y += self.direction.y*speed
+        self.hitbox.y += self.direction.y*speed
         self.collide("vertical")
+
+        # Set the rect box to hitbox
+        self.rect.center = self.hitbox.center
+
 
     def collide(self, direction):
         if direction == "horizontal":
             for sprite in self.obstacle_sprites:
-                if sprite.rect.colliderect(self.rect):
+                if sprite.hitbox.colliderect(self.hitbox):
                     if self.direction.x > 0:
-                        self.rect.right = sprite.rect.left
+                        self.hitbox.right = sprite.hitbox.left
                     if self.direction.x < 0:
-                        self.rect.left = sprite.rect.right
+                        self.hitbox.left = sprite.hitbox.right
 
         if direction == "vertical":
             for sprite in self.obstacle_sprites:
-                if sprite.rect.colliderect(self.rect):
+                if sprite.rect.colliderect(self.hitbox):
                     if self.direction.y > 0:
-                        self.rect.bottom = sprite.rect.top
+                        self.hitbox.bottom = sprite.hitbox.top
                     if self.direction.y < 0:
-                        self.rect.top = sprite.rect.bottom
+                        self.hitbox.top = sprite.hitbox.bottom
     def update(self):
         self.input()
         self.move(self.speed)
