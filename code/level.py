@@ -40,11 +40,11 @@ class Level:
                     if style == "boundary":
                         Tile((x,y), [self.obstacle_sprites], 'invisible')
                     if style == "grass":
-                        random_grass_image = choice(graphics['grass'])
-                        Tile((x,y), [self.visible_sprites, self.obstacle_sprites], 'grass', random_grass_image)
+                        random_grass_surf = choice(graphics['grass'])
+                        Tile((x,y), [self.visible_sprites, self.obstacle_sprites], 'grass', random_grass_surf)
                     if style == "object":
-                        surf = graphics['object'][int(col)]
-                        Tile((x,y), [self.visible_sprites, self.obstacle_sprites], 'object', surf)
+                        object_surf = graphics['object'][int(col)]
+                        Tile((x,y), [self.visible_sprites, self.obstacle_sprites], 'object', object_surf)
                         pass
 
         self.player = Player((2000,1430), [self.visible_sprites], self.obstacle_sprites)
