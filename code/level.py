@@ -54,7 +54,7 @@ class Level:
         # Draw and update the sprites
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        debug(self.player.direction)
+        debug(self.player.status)
         pass
 
 class YSortCameraGroup(pygame.sprite.Group):
