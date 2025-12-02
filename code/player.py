@@ -1,38 +1,57 @@
 from typing import Callable
 import pygame
-from settings import weapon_data
+from settings import weapon_data, magic_data
 from os import walk
 from support import import_folder
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos: tuple[int, int], groups: pygame.sprite.Group, 
                  obstacle_sprites:pygame.Surface, 
                  create_attack: Callable,
-                 destroy_attack: Callable):
+                 destroy_attack: Callable,
+                 create_magic: Callable,
+                 destroy_magic: Callable):
         super().__init__(groups)
+
+        # Player image
         self.image = pygame.image.load("graphics/test/player.png").convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
         self.import_character_assets()
 
+        # Player collision
+        self.hitbox = self.rect.inflate(0, -26)
+        self.obstacle_sprites = obstacle_sprites
+
+        # Player movement
         self.direction = pygame.math.Vector2()
         self.status = 'down'
         self.frame_index = 0
         self.animation_speed = 0.15
 
+        # Player attack cooldown
         self.attacking = False
         self.attack_cooldown = 400
         self.attack_time = None
 
-        self.create_attack = create_attack
+        self.switch_cooldown = 200
+        # Player attack handler
         self.weapon_index = 0
         self.weapon = list(weapon_data.keys())[self.weapon_index]
-        self.destroy_attack = destroy_attack
         self.can_switch_weapon = True
         self.switch_weapon_time = None
-        self.switch_weapon_cooldown = 200
+        self.create_attack = create_attack
+        self.destroy_attack = destroy_attack
 
-        self.hitbox = self.rect.inflate(0, -26)
-        self.obstacle_sprites = obstacle_sprites
+        # Player magic handler
+        self.magic_index = 0
+        self.magic = list(magic_data.keys())[self.magic_index]
+        self.can_switch_magic = True
+        self.switch_magic_time = None
+        self.create_magic = create_magic
+        self.destroy_magic = destroy_magic
 
+
+
+        # Player status
         self.stats = {'health': 100, 'energy': 60, 'attack': 40, 'magic': 4, 'speed' : 10}
         self.health = self.stats['health']
         self.energy = self.stats['energy']
@@ -80,12 +99,22 @@ class Player(pygame.sprite.Sprite):
             if keys[pygame.K_s]:
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
+                style = list(magic_data.keys())[self.magic_index]
+                strength = magic_data[style]['strength'] + self.stats['magic']
+                cost = magic_data[style]['cost']
+                self.create_magic(style, strength, cost)
 
-            if keys[pygame.K_a] and self.can_switch_weapon:
+            if keys[pygame.K_e] and self.can_switch_weapon:
                 self.can_switch_weapon = False
                 self.switch_weapon_time = pygame.time.get_ticks()
                 self.weapon_index = (self.weapon_index + 1) % len(weapon_data)
                 self.weapon = list(weapon_data.keys())[self.weapon_index]
+            
+            if keys[pygame.K_w] and self.can_switch_magic:
+                self.can_switch_magic = False
+                self.switch_magic_time = pygame.time.get_ticks()
+                self.magic_index = (self.magic_index + 1) % len(magic_data)
+                self.magic = list(magic_data.keys())[self.magic_index]
 
     def move(self, speed):
         if self.direction.magnitude() != 0:
@@ -115,14 +144,19 @@ class Player(pygame.sprite.Sprite):
     def cooldowns(self):
         if self.attacking:
             current_time = pygame.time.get_ticks()
-            if current_time - self.attack_time >= self.attack_cooldown:
+            if current_time - self.attack_time >= self.switch_cooldown:
                 self.attacking = False
                 self.destroy_attack()
 
         if not self.can_switch_weapon:
             current_time = pygame.time.get_ticks()
-            if current_time - self.switch_weapon_time >= self.switch_weapon_cooldown:
+            if current_time - self.switch_weapon_time >= self.switch_cooldown:
                 self.can_switch_weapon = True
+        
+        if not self.can_switch_magic:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.switch_magic_time >= self.switch_cooldown:
+                self.can_switch_magic = True
 
     def collide(self, direction):
         if direction == "horizontal":

@@ -58,7 +58,9 @@ class Level:
         self.player = Player((2000,1430), [self.visible_sprites], 
                              self.obstacle_sprites, 
                              self.create_weapon,
-                             self.destroy_weapon)
+                             self.destroy_weapon,
+                             self.create_magic,
+                             self.destroy_magic)
 
     def create_weapon(self):
         self.current_attack = Weapon(self.player, [self.visible_sprites])
@@ -67,6 +69,17 @@ class Level:
         if self.current_attack:
             self.current_attack.kill()
         self.current_attack = None
+
+    def create_magic(self, style, strength, cost):
+        print(cost)
+        print(style)
+        print(strength)
+    
+    def destroy_magic(self):
+        pass
+    #     if self.current_attack:
+    #         self.current_attack.kill()
+    #     self.current_attack = None
 
     def run(self):
         # Draw and update the sprites
